@@ -174,24 +174,40 @@ if __name__ == '__main__':
 	st.set_page_config(page_title="Board Game Rulebook Search", page_icon=":dice:")
 	st.header("Query Rulebook PDFs")
 	
-	form_input = st.text_input('Ask question')
-	st.caption("""Sample questions:""")
-	st.caption("_Which games have a solo mode?_")
-	st.caption("_Which games take place in the middle ages?_")
-	st.caption("_Which games have the most number of components?_")
-	st.caption("_Can you recommend a game I can play with young kids?_")
-
-	submit = st.button("Generate")
+	st.text("This search and retrieval augmented generation uses 100+ board game rulebook PDFs, downloaded from boardgamegeek.com. The full list of games is here: ")
 	
-	if submit:
-		with st.spinner(text = "Loading Vector DB..."):
-			vectordb = load_vectordb(db_path = "maxx_db", db_name = 'subset_db')
-		with st.spinner(text = "Performing Cosine-similarity search..."):
-			context_text, context_sources = query_to_context(vectordb, query = form_input)
-		with st.spinner(text = "Generating LLM response..."):
-			response_text = context_to_response(context_text, query = form_input)
-		st.success(response_text)
-		st.write(f"Sources: {context_sources}")
+	with st.form("query"):
+		form_input = st.text_input('Ask question')
+		st.caption("""Sample questions:""")
+		st.caption("_Which games have an auction mechanism?_")
+		st.caption("_Which games take place in the middle ages?_")
+		st.caption("_Can you outline the setup for the game of Concordia with the Imperium map?_")
+
+		submit = st.form_submit_button("Generate")
+	
+		if submit:
+			with st.spinner(text = "Loading Vector DB..."):
+				vectordb = load_vectordb(db_path = "maxx_db", db_name = 'subset_db')
+			with st.spinner(text = "Performing Cosine-similarity search..."):
+				context_text, context_sources = query_to_context(vectordb, query = form_input)
+			with st.spinner(text = "Generating LLM response..."):
+				response_text = context_to_response(context_text, query = form_input)
+			st.success(response_text)
+			st.write(f"Sources: {context_sources}")
+			
+	st.markdown("""
+	### Technical Specifications  
+	- Vector Database: _Chroma_  
+	- Text Embedding/Vectorization Model: `text-embedding-3-large`  
+	- Search Method: _Cosine Similarity_ (Euclidian Metric)  
+	- Response Generation Model: `gpt-3.5-turbo-instruct`  
+	- Prototype UI: Streamlit
+	### To-do:  
+	- Refine chunk size
+	- Use entirely local LLM
+	- Ingest more PDFs
+	- Prompt-engineering
+	""")
 	
 	#streamlit run <FILE_NAME>.py
 	
