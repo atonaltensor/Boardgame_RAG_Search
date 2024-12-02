@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.document_loaders.pdf import PyPDFDirectoryLoader
@@ -171,10 +172,27 @@ if __name__ == '__main__':
 	#main2()
 	
 	###streamlit
-	st.set_page_config(page_title="Board Game Rulebook Search", page_icon=":dice:")
+	st.set_page_config(
+		page_title="Board Game Rulebook Search", 
+		page_icon=":game_die:",
+		menu_items={
+			'Get help': None,
+			'Report a Bug': None,
+			'About': None
+		})
+	st.markdown(
+	    """
+	<style>
+	    [data-testid="collapsedControl"] {
+	        display: none
+	    }
+	</style>
+	""",
+	    unsafe_allow_html=True,
+	)
 	st.header("Query Rulebook PDFs")
 	
-	st.text("This search and retrieval augmented generation uses 100+ board game rulebook PDFs, downloaded from boardgamegeek.com. The full list of games is here: ")
+	st.text("This search and retrieval augmented generation uses 100+ board game rulebook PDFs, downloaded from boardgamegeek.com. The full list of games can be found below.")
 	
 	with st.form("query"):
 		form_input = st.text_input('Ask question')
@@ -182,6 +200,7 @@ if __name__ == '__main__':
 		st.caption("_Which games have an auction mechanism?_")
 		st.caption("_Which games take place in the middle ages?_")
 		st.caption("_Can you outline the setup for the game of Concordia with the Imperium map?_")
+		st.caption("What was that game where players are artists during the Art Noveau period trying to make a living?")
 
 		submit = st.form_submit_button("Generate")
 	
@@ -203,13 +222,18 @@ if __name__ == '__main__':
 	- Response Generation Model: `gpt-3.5-turbo-instruct`  
 	- Prototype UI: Streamlit
 	### To-do:  
-	- Refine chunk size
+	- Refine chunk size (Improve accuracy!!!)
 	- Use entirely local LLM
 	- Ingest more PDFs
 	- Prompt-engineering
 	""")
 	
+	with st.expander("See complete list of rulebook PDFs parsed"):
+		st.dataframe(pd.read_csv('games.csv'))
 	#streamlit run <FILE_NAME>.py
+	#deployment notes to ensure app works remotely: 
+	## 1. When setting reverse proxy, NEED to add the 2 heaaders for WebSocket support. Otherwise, page will be stuck on loading screen. 
+	## 2. (Unclear if this matters) in ~/.streamlit/config.toml, set server.enableXsrfProtection=false, server.enablesCORS=false, and browser.serverAddress=rag.maxxcho.com
 	
 	_ = """
 	>>> Which games have a solo mode?
